@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Scanned pages to Markdown">
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#1f6feb"/>
+  <rect x="14" y="12" width="28" height="38" rx="3" fill="#ffffff"/>
+  <g fill="#1f6feb">
+    <rect x="18" y="19" width="20" height="2.6" rx="1.3"/>
+    <rect x="18" y="25" width="20" height="2.6" rx="1.3"/>
+    <rect x="18" y="31" width="14" height="2.6" rx="1.3"/>
+    <rect x="18" y="37" width="17" height="2.6" rx="1.3"/>
+  </g>
+  <path d="M38 34v12h8" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="41" y="40" width="14" height="14" rx="3" fill="#ffd166"/>
+  <g stroke="#1f6feb" stroke-width="2.2" stroke-linecap="round">
+    <line x1="48" y1="44" x2="48" y2="50"/>
+    <line x1="45" y1="47" x2="51" y2="47"/>
+  </g>
+</svg>

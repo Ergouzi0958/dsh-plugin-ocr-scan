@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "Scanned pages to Markdown",
+    "description": "Turn scanned book pages or photos into Markdown. A cloud OCR model reads each page; the plugin orders pages by their printed folios, strips running heads, rebuilds tables, and writes every original page image beside the text so the folder imports straight into Obsidian.",
+    "detail": "docs/DETAIL.md"
+  },
+  "panel": {
+    "title": "Scanned pages to Markdown",
+    "drop": "Drop page images",
+    "hint": "Pages are ordered, running heads removed, tables rebuilt, and images written next to the Markdown",
+    "bookTitle": "Book title (used as the top heading)",
+    "model": "Model",
+    "endpoint": "Endpoint (OpenAI compatible)",
+    "start": "Start",
+    "running": "Working",
+    "clear": "Clear",
+    "selected": "{n} pages selected",
+    "noKey": "No API key yet: set it in plugin settings or export OCR_SCAN_API_KEY",
+    "done": "Finished",
+    "copyPath": "Copy file path"
+  }
+}

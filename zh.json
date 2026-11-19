@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "扫描件转 Markdown",
+    "description": "把书本扫描页或拍照图片转成 Markdown。用云端 OCR 模型识别，自动按书页顺序排序、清理页眉页码、修正表格，并把每页原图一起存好，生成的文件夹可直接导入 Obsidian。",
+    "detail": "docs/DETAIL.md"
+  },
+  "panel": {
+    "title": "扫描件转 Markdown",
+    "drop": "拖入页面图片",
+    "hint": "识别后自动排页序、清理页眉、修表格、生成 Markdown 和 images 目录",
+    "bookTitle": "书名（作为一级标题）",
+    "model": "模型",
+    "endpoint": "接口地址（OpenAI 兼容）",
+    "start": "开始识别",
+    "running": "识别中",
+    "clear": "清空",
+    "selected": "已选 {n} 页",
+    "noKey": "还没有 API Key：在插件设置里填，或设置环境变量 OCR_SCAN_API_KEY",
+    "done": "已完成",
+    "copyPath": "复制文件路径"
+  }
+}
