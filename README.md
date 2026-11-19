@@ -1,5 +1,9 @@
 # 扫描件转 Markdown · DeepSeek Harness 插件
 
+> **本项目的代码由 `dsh`（DeepSeek Harness agent）生成。**
+> 需求、测试素材与效果验收由 Ergouzi0958 提供。贡献比例与分工见 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
+> `dsh` 是 AI agent 的署名，不对应任何 GitHub 账号，因此不出现在右侧 Contributors 图上。
+
 把一叠书页照片拖进对话框，插件帮你把它变成一份**能搜、能复制、能直接导进 Obsidian 的 Markdown 文档**，而且页序是自动排好的。
 
 这是给 [DeepSeek Harness](https://github.com/deepseek-ai) 用的插件。
