@@ -239,35 +239,97 @@ function stripRunningHead(text) {
 
 /** The model emits `| a | b |` rows without a delimiter row, which most
  *  Markdown renderers refuse to see as a table. Rebuild them properly. */
+/** PaddleOCR sometimes repeats the same caption three times inside one line
+ *  (`图9-7 空心轴  图9-7 空心轴  图9-7 空心轴`). Keep the first of each. */
+function dedupeCaptions(text) {
+  const captionish = (s) => /^图\s*\d|^表\s*\d|^\d+\s*[—–-]\s*\S/.test(s);
+
+  return text
+    .split('\n')
+    .map((ln) => {
+      const units = String(ln).trim().split(/\s{2,}/).filter(Boolean);
+      if (units.length < 2 || !captionish(units[0])) return ln;
+      const seen = [];
+      for (const u of units) if (seen.indexOf(u) === -1) seen.push(u);
+      return seen.length < units.length ? seen.join('  ') : ln;
+    })
+    .join('\n');
+}
+
+/** Split a line into table cells, or null when it is not a table row.
+ *
+ *  Models disagree on whether a table row starts with a pipe: Hunyuan emits
+ *  `| a | b |`, PaddleOCR-VL emits `a | b`. Requiring a leading pipe silently
+ *  turned every PaddleOCR table into prose, so the test is "has at least two
+ *  pipes", and a real table is a run of at least two such lines.
+ */
+function tableCells(line) {
+  const t = String(line || '').trim();
+  if (!t) return null;
+  if ((t.match(/\|/g) || []).length < 2) return null;
+  return t.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+}
+
+/** `---|---` / `|:--|--:|` — the delimiter row Markdown needs. */
+function isDelimiterRow(cells) {
+  if (!cells || cells.length < 2) return false;
+  let dashes = 0;
+  for (const c of cells) {
+    if (c === '') continue;
+    if (/^:?-{2,}:?$/.test(c)) {
+      dashes += 1;
+      continue;
+    }
+    return false;
+  }
+  return dashes >= 2;
+}
+
+/** Rebuild every table as valid Markdown: leading pipes, a delimiter row,
+ *  and one column count for all rows. */
 function fixMarkdownTables(text) {
   const lines = text.split('\n');
   const out = [];
   let i = 0;
   while (i < lines.length) {
-    const ln = lines[i];
-    if (!(ln.trim().startsWith('|') && (ln.match(/\|/g) || []).length >= 3)) {
-      out.push(ln);
+    const first = tableCells(lines[i]);
+    const second = tableCells(lines[i + 1]);
+    if (!first || !second) {
+      out.push(lines[i]);
       i += 1;
       continue;
     }
+
     const block = [];
-    while (
-      i < lines.length &&
-      lines[i].trim().startsWith('|') &&
-      (lines[i].match(/\|/g) || []).length >= 3
-    ) {
-      block.push(lines[i]);
+    while (i < lines.length) {
+      const cells = tableCells(lines[i]);
+      if (!cells) break;
+      block.push(cells);
       i += 1;
     }
-    const rows = [];
-    for (const b of block) {
-      const cells = b.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
-      if (cells.length && cells.every((c) => /^:?-{2,}:?$/.test(c || '-'))) continue;
-      rows.push(cells);
-    }
+
+    const rows = block.filter((cells) => !isDelimiterRow(cells));
     if (!rows.length) continue;
+
     const width = Math.max(...rows.map((r) => r.length));
     const padded = rows.map((r) => r.concat(Array(width - r.length).fill('')));
+
+    // A short orphan line directly above the table is usually a header fragment
+    // the model split off ("弯曲疲劳"), not content.
+    let k = out.length - 1;
+    while (k >= 0 && !out[k].trim()) k -= 1;
+    if (k >= 0) {
+      const cand = out[k].trim();
+      const orphan =
+        cand.length <= 10 &&
+        !/[。，；：！？、]/.test(cand) &&
+        !cand.startsWith('#') &&
+        !cand.startsWith('|') &&
+        !cand.startsWith('![') &&
+        !/^图\s*\d|^表\s*\d/.test(cand);
+      if (orphan) out.splice(k, 1);
+    }
+
     if (out.length && out[out.length - 1].trim()) out.push('');
     out.push(`| ${padded[0].join(' | ')} |`);
     out.push(`|${Array(width).fill(' --- ').join('|')}|`);
@@ -275,6 +337,25 @@ function fixMarkdownTables(text) {
     if (i < lines.length && lines[i].trim()) out.push('');
   }
   return out.join('\n');
+}
+
+/** Join the short label lines under a figure into one line, and collapse the
+ *  runs of blank lines the model leaves behind. */
+function tightenBlocks(text) {
+  const lines = text.split('\n');
+  const out = [];
+  const labelish = (s) => /^图\s*\d|^\d+\s*[—–-]\s*\S/.test(s.trim());
+
+  for (const ln of lines) {
+    const prev = out.length ? out[out.length - 1] : '';
+    if (labelish(ln) && prev && labelish(prev)) {
+      out[out.length - 1] = `${prev.trim()}  ${ln.trim()}`;
+      continue;
+    }
+    out.push(ln);
+  }
+
+  return out.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
 /** Markdown needs a blank line between blocks, or two lines render as one
@@ -298,7 +379,7 @@ function separateBlocks(text) {
     }
     out.push(ln);
   }
-  return out.join('\n');
+  return out.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
 function stripFakeImages(text) {
@@ -462,7 +543,7 @@ async function writeBook({ pages, title, dir }) {
   }
 
   let md = parts.join('\n\n');
-  md = separateBlocks(fixMarkdownTables(md));
+  md = separateBlocks(tightenBlocks(fixMarkdownTables(dedupeCaptions(md))));
   if (title) md = `# ${title}\n\n${md}`;
 
   const mdName = `${slug(title || 'ocr-scan')}.md`;
