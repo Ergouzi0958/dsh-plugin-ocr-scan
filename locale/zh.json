@@ -15,7 +15,7 @@
     "running": "识别中",
     "clear": "清空",
     "selected": "已选 {n} 页",
-    "noKey": "还没有 API Key：在插件设置里填，或设置环境变量 OCR_SCAN_API_KEY",
+    "noKey": "还没有 API Key：点右上角齿轮填写，保存后不用重填",
     "done": "已完成",
     "copyPath": "复制文件路径"
   }

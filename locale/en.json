@@ -15,7 +15,7 @@
     "running": "Working",
     "clear": "Clear",
     "selected": "{n} pages selected",
-    "noKey": "No API key yet: set it in plugin settings or export OCR_SCAN_API_KEY",
+    "noKey": "No API key yet: open the gear icon and paste one; it is remembered",
     "done": "Finished",
     "copyPath": "Copy file path"
   }
